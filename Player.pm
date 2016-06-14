@@ -95,6 +95,11 @@ sub turn_end {
 	$self->set_is_turn(0);
 }
 
+#2016/06/14 
+#ここ手札がMAX_HAND_NUMに到達している時、手札引いたら結局手札増えてました。
+#MAX_HAND_NUM + 1 枚まで手札に加えられるようになってました。
+#修正済
+
 sub draw_card {
 	my $self = shift;
 
@@ -105,13 +110,17 @@ sub draw_card {
 	}
 
 	# handが多すぎるときはhandに加えず消去
-	if ($self->hand_num > $MAX_HAND_NUM) {
+	if ($self->hand_num >= $MAX_HAND_NUM) {
 		$self->get_deck->draw_card;
+	}else{
+		# handに加える
+		push (@{$self->get_hand}, $self->get_deck->draw_card);
 	}
-
-	# handに加える
-	push (@{$self->get_hand}, $self->get_deck->draw_card);
 }
+
+#2016/06/14 
+#召喚しようとしたカードのコストが利用可能マナを超えていた場合、カードが消失してました。
+#修正済
 
 sub play_card_by_no {
 	my $self = shift;
@@ -127,6 +136,7 @@ sub play_card_by_no {
 	my $played_card = splice(@{$self->get_hand}, $no - 1, 1);
 
 	if ($played_card->get_cost > $self->usable_mana) {
+		splice(@{$self->get_hand}, $no - 1, 0, $played_card);
 		return +{
 			has_error => 1,
 			message   => "not enough mana",

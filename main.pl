@@ -113,6 +113,10 @@ sub play {
 	}
 }
 
+#2016/06/14 
+#hoge, fugaという不必要な変数
+#修正済
+
 sub attack {
 	my ($player, $opponent) = @_;
 
@@ -166,9 +170,6 @@ sub attack {
 		$opponent->add_damage($attack_card->get_attack);
 	} else {
 		my $defense_card = $opponent->pick_field_card_by_no($defense_card_no);
-
-		my $hoge = $attack_card->get_attack;
-		my $fuga = $defense_card->get_attack;
 
 		# お互いに攻撃
 		$defense_card->add_damage($attack_card->get_attack);
