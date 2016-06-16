@@ -313,9 +313,46 @@ sub can_use_hero_power {
 
 sub use_hero_power {
 	my $self = shift;
-	my ($player, $opponent) = @_;
+	my ($opponent) = @_;
 	$self->use_mana_by_cost($self->get_hero->get_hero_power_cost);
-	$self->get_hero->use_hero_power($player, $opponent);
+	$self->get_hero->use_hero_power($self, $opponent);
+}
+
+sub show_content {
+	my $self = shift;
+	my ($no_hand_information) = @_;
+
+	my $player_name = $self->get_name;
+	print "${player_name} \'s information .\n";
+
+	# mana
+	my $usable_mana = $self->usable_mana;
+	my $max_mana     = $self->get_max_mana;
+	print "mana ${usable_mana} / ${max_mana} .\n";
+
+	$self->get_hero->show_content;
+
+	my $no = 1;
+	unless ($no_hand_information) {
+		print "### hand ###\n";
+		for my $hand_card (@{$self->get_hand}) {
+			print "===.\n";
+			print "no: ${no}.\n";
+			$hand_card->show_content;
+			$no++;
+		}
+	}
+
+	print "\n";
+	print "### field ###\n";
+	$no = 1;
+	for my $field (@{$self->get_field}) {
+		print "===.\n";
+		print "no: ${no}.\n";
+		$field->show_content;
+		$no++;
+	}
+	print "\n";
 }
 
 1;

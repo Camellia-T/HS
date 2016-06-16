@@ -18,14 +18,13 @@ sub build {
 
 	return $self->new(+{
 		name     => "Hunter",
-		ability_context => "Deal 2 Damage to the enemy hero.",
+		ability_context => "Deal 2 Damage to the enemy hero",
 	});
 }
 
 sub manifest_ability {
-	my $class = shift;
-	my ($player, $opponent) = @_;
-	$opponent->hero->add_damage(2);
+	my ($opponent) = @_;
+	$opponent->add_damage(2);
 }
 
 sub show_content {
@@ -33,7 +32,8 @@ sub show_content {
 	my $name = $self->get_name;
 	my $context = $self->get_ability_context;
 	print "Ability Name: ${name}.\n";
-	print "Ability Context :\n ${context}.\n";
+	print "Ability Context : ${context}.\n";
+	print "\n";
 }
 
 1;

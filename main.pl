@@ -63,7 +63,7 @@ while (1) {
 	} elsif ($command eq 'hp') {
 		if($player->can_use_hero_power){
 			print "could\n";
-			$player->use_hero_power($player,$opponent);
+			$player->use_hero_power($opponent);
 		}else{
 			print "cannot\n";
 		}
@@ -216,38 +216,5 @@ sub dump_information_by_player {
 	my ($player, %options) = @_;
 	my $no_hand_information = $options{no_hand_information};
 
-	my $player_name = $player->get_name;
-	print "${player_name} \'s information .\n";
-
-	# mana
-	my $usable_mana = $player->usable_mana;
-	my $max_mana     = $player->get_max_mana;
-	print "mana ${usable_mana} / ${max_mana} .\n";
-
-
-	my $hero_health = $player->get_hero_health;
-	print "hero health:${hero_health} .\n";
-	print "\n";
-
-	my $no = 1;
-	unless ($no_hand_information) {
-		print "### hand ###\n";
-		for my $hand_card (@{$player->get_hand}) {
-			print "===.\n";
-			print "no: ${no}.\n";
-			$hand_card->show_content;
-			$no++;
-		}
-	}
-
-	print "\n";
-	print "### field ###\n";
-	$no = 1;
-	for my $field (@{$player->get_field}) {
-		print "===.\n";
-		print "no: ${no}.\n";
-		$field->show_content;
-		$no++;
-	}
-	print "\n";
+	$player->show_content($no_hand_information);
 }
