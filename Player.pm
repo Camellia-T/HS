@@ -122,23 +122,20 @@ sub draw_card {
 	}
 }
 
-#2016/06/14 
-#召喚しようとしたカードのコストが利用可能マナを超えていた場合、カードが消失してました。
-#修正済
+# 2016/06/14 
+# 召喚しようとしたカードのコストが利用可能マナを超えていた場合、カードが消失してました。
+# 修正済
 
+# 2016/06/17
+# 呪文効果適用のため、引数に敵対者のPlayerクラス渡すよう変更。
 sub play_card_by_no {
 	my $self = shift;
-	my ($no) = @_;
-
-	# fieldにcard多すぎ
-	return +{
-		has_error => 1,
-		message   => "too much card on field",
-	} unless ($self->field_num <= $MAX_FIELD_NUM);
+	my ($no, $opponent) = @_;
 
 	# no - 1 番目から 1枚取る
 	my $played_card = splice(@{$self->get_hand}, $no - 1, 1);
 
+	#マナが足りるかチェック
 	if ($played_card->get_cost > $self->usable_mana) {
 		splice(@{$self->get_hand}, $no - 1, 0, $played_card);
 		return +{
@@ -146,6 +143,22 @@ sub play_card_by_no {
 			message   => "not enough mana",
 		};
 	}
+
+	#呪文ならば使用
+	if ($played_card->is_spell) {
+		$self->use_mana_by_cost($played_card->get_cost);
+		$played_card->use_spell($self, $opponent);
+
+		return +{
+			has_error => 0,
+		};
+	}
+
+	# ミニオンならば field が一杯かチェック
+	return +{
+		has_error => 1,
+		message   => "too much card on field",
+	} unless ($self->field_num <= $MAX_FIELD_NUM);
 
 	$played_card->set_attacked unless ($played_card->has_charge);
 

@@ -13,6 +13,15 @@ my @attributes = qw/
 __PACKAGE__->follow_best_practice;
 __PACKAGE__->mk_accessors(@attributes);
 
+# アビリティは敵味方両方の保持するデータ全てに適用される可能性が在るため、
+# 引数は自分自身と敵対者のPlayerクラスを引数にもらい、効果を適用する。
+# プレイヤーが持つヒーローやカードがプレイヤーに影響を及ぼすという
+# 処理の循環が生じる可能性があるためアビリティは一元管理していたほうが良いと判断。
+
+# 今回は１つの効果を実現すれば良いため、このクラスで実装しているが、
+# これから効果を増やすに当たっては、このクラスをアビリティの管理クラスに据えて
+# 効果ごとに以下の関数テンプレートに則ったクラスを量産する。
+
 sub build {
 	my $self = shift;
 
@@ -23,7 +32,8 @@ sub build {
 }
 
 sub manifest_ability {
-	my ($opponent) = @_;
+	my $self = shift;
+	my ($player,$opponent) = @_;
 	$opponent->add_damage(2);
 }
 

@@ -142,34 +142,40 @@ sub DEFAULT_DECK_SEED {
 			health => 5,
 		},
 				+{
-			cost   => 5,
+			cost   => 1,
 			attack => 3,
 			health => 7,
+			spell => 1,
 		},
 		+{
-			cost   => 6,
+			cost   => 1,
 			attack => 5,
 			health => 8,
+			spell => 1,
 		},
 		+{
-			cost   => 6,
+			cost   => 1,
 			attack => 6,
 			health => 7,
+			spell => 1,
 		},
 		+{
 			cost   => 7,
 			attack => 6,
 			health => 8,
+			spell => 1,
 		},
 		+{
 			cost   => 0,
 			attack => 1,
 			health => 1,
+			spell => 1,
 		},
 		+{
 			cost   => 5,
 			attack => 8,
 			health => 1,
+			spell => 1,
 		},
 	],
 }

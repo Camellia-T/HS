@@ -45,7 +45,7 @@ while (1) {
 	if ($command eq 'attack') {
 		attack($player, $opponent);
 	} elsif ($command eq 'play') {
-		play($player);
+		play($player,$opponent);
 	} elsif ($command eq 'surrender') {
 		$player->surrender;
 	} elsif ($command eq 'end') {
@@ -92,7 +92,7 @@ if ($player1->is_alive) {
 }
 
 sub play {
-	my ($player) = @_;
+	my ($player, $opponent) = @_;
 
 	unless ($player->can_play) {
 		print "no playable card you have! \n";
@@ -115,7 +115,7 @@ sub play {
 		return;
 	}
 
-	my $error_hash = $player->play_card_by_no($no);
+	my $error_hash = $player->play_card_by_no($no, $opponent);
 	if ($error_hash->{has_error}) {
 		print $error_hash->{message};
 		print "\n";

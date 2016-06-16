@@ -58,10 +58,7 @@ sub use_hero_power {
 	my ($player, $opponent) = @_;
 
 	#ここでアビリティ使用
-	#$self->get_hero_power->manifest_ability($opponent);
-	#$player->get_hero->add_damage(-2);
-	$opponent->get_hero->add_damage(2);
-
+	$self->get_hero_power->manifest_ability($player,$opponent);
 	$self->set_used_hero_power(0);
 }
 
