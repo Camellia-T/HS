@@ -58,6 +58,15 @@ while (1) {
 		for (1 .. 100) {
 			print "\n";
 		}
+	#2016/06/15
+	#ヒーローパワーの実装	
+	} elsif ($command eq 'hp') {
+		if($player->can_use_hero_power){
+			print "could\n";
+			$player->use_hero_power($player,$opponent);
+		}else{
+			print "cannot\n";
+		}
 	} else {
 		print "attack: attack by your field card.\n";
 		print "play: play by your hand.\n";
@@ -125,6 +134,11 @@ sub attack {
 		return;
 	}
 
+	# 挑発持ちの敵が場にあるとき、notice
+	if ($opponent->can_provoke){
+		print "Adovocation card is in opponent's field \n"
+	}
+
 	# 攻撃側
 	print "which card do you attack from? type your card no \n";
 	my $attack_card_no = <STDIN>;
@@ -166,10 +180,23 @@ sub attack {
 		return;
 	}
 
+
+
 	if ($defense_card_no == 0) {
+		#挑発チェック
+		if ($opponent->can_provoke){
+			print "can not attack because of adovocation. \n";
+			return;
+		}
 		$opponent->add_damage($attack_card->get_attack);
 	} else {
 		my $defense_card = $opponent->pick_field_card_by_no($defense_card_no);
+
+		#挑発チェック
+		if ($opponent->can_provoke && !$defense_card->has_provocation){
+			print "can not attack because of adovocation. \n";
+			return;
+		}
 
 		# お互いに攻撃
 		$defense_card->add_damage($attack_card->get_attack);
@@ -206,33 +233,20 @@ sub dump_information_by_player {
 	unless ($no_hand_information) {
 		print "### hand ###\n";
 		for my $hand_card (@{$player->get_hand}) {
-			my $cost   = $hand_card->get_cost;
-			my $attack = $hand_card->get_attack;
-			my $health = $hand_card->get_health;
-			my $has_charge = $hand_card->has_charge;
 			print "===.\n";
 			print "no: ${no}.\n";
-			print "cost: ${cost}.\n";
-			print "attack: ${attack}.\n";
-			print "health: ${health}.\n";
-			if ($has_charge) {
-				print "has charge.\n";
-			}
+			$hand_card->show_content;
 			$no++;
 		}
 	}
+
 	print "\n";
 	print "### field ###\n";
 	$no = 1;
 	for my $field (@{$player->get_field}) {
-		my $cost   = $field->get_cost;
-		my $attack = $field->get_attack;
-		my $health = $field->get_health;
 		print "===.\n";
 		print "no: ${no}.\n";
-		print "cost: ${cost}.\n";
-		print "attack: ${attack}.\n";
-		print "health: ${health}.\n";
+		$field->show_content;
 		$no++;
 	}
 	print "\n";

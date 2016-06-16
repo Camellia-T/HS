@@ -68,6 +68,10 @@ sub turn_initialize {
 	$self->reset_mana;
 	$self->set_field_card_attackable;
 	$self->set_is_turn_initialized(1);
+
+	#2016/6/15
+	#add hero power system
+	$self->get_hero->refresh_hero_power;
 }
 
 sub is_turn {
@@ -233,6 +237,15 @@ sub can_play {
 	return (scalar @{$self->playable_card_list} > 0) ? 1 : 0
 }
 
+#2016/06/14 
+#add provocation system
+
+sub can_provoke {
+	my $self = shift;
+
+	return (scalar @{$self->provocation_card_list} > 0) ? 1 : 0
+}
+
 sub get_hero_health {
 	my $self = shift;
 
@@ -249,6 +262,15 @@ sub attackable_card_list {
 	my $self = shift;
 
 	return +[ grep { $_->can_attack } @{$self->field_list} ];
+}
+
+#2016/06/14 
+#add provocation system
+
+sub provocation_card_list {
+	my $self = shift;
+
+	return +[ grep { $_->has_provocation } @{$self->field_list} ];
 }
 
 sub playable_card_list {
@@ -279,6 +301,21 @@ sub field_num {
 	my $self = shift;
 
 	return scalar @{$self->get_field};
+}
+
+#2016/06/15
+#add hero power system
+
+sub can_use_hero_power {
+	my $self = shift;
+	return $self->get_hero->can_use_hero_power && $self->get_hero->get_hero_power_cost <= $self->usable_mana;
+}
+
+sub use_hero_power {
+	my $self = shift;
+	my ($player, $opponent) = @_;
+	$self->use_mana_by_cost($self->get_hero->get_hero_power_cost);
+	$self->get_hero->use_hero_power($player, $opponent);
 }
 
 1;

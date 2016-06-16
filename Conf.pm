@@ -11,11 +11,13 @@ sub DEFAULT_DECK_SEED {
 			cost   => 1,
 			attack => 1,
 			health => 1,
+			provocation => 1,
 		},
 		+{
 			cost   => 2,
 			attack => 2,
 			health => 2,
+			provocation => 1,
 		},
 		+{
 			cost   => 3,
@@ -27,21 +29,25 @@ sub DEFAULT_DECK_SEED {
 			cost   => 1,
 			attack => 1,
 			health => 2,
+			provocation => 1,
 		},
 		+{
 			cost   => 2,
 			attack => 2,
 			health => 3,
+			provocation => 1,
 		},
 		+{
 			cost   => 3,
 			attack => 3,
 			health => 4,
+			divine_shield => 1,
 		},
-				+{
+		+{
 			cost   => 1,
 			attack => 2,
 			health => 1,
+			divine_shield => 1,
 		},
 		+{
 			cost   => 2,
@@ -53,6 +59,7 @@ sub DEFAULT_DECK_SEED {
 			cost   => 3,
 			attack => 3,
 			health => 4,
+			divine_shield => 1,
 		},
 		+{
 			cost   => 1,
@@ -64,6 +71,7 @@ sub DEFAULT_DECK_SEED {
 			cost   => 2,
 			attack => 2,
 			health => 1,
+			divine_shield => 1,
 		},
 		+{
 			cost   => 3,
@@ -102,7 +110,7 @@ sub DEFAULT_DECK_SEED {
 			health => 1,
 			charge => 1,
 		},
-				+{
+		+{
 			cost   => 3,
 			attack => 5,
 			health => 1,
