@@ -17,6 +17,7 @@ my @attributes = qw/
 	field
 	is_turn
 	is_turn_initialized
+	abilityMgr
 /;
 
 __PACKAGE__->follow_best_practice;
@@ -31,7 +32,7 @@ my $MAX_FIELD_NUM  = 7;
 
 sub build_by_player_name {
 	my $class = shift;
-	my ($name) = @_;
+	my ($name,$amgr) = @_;
 
 	my $hero = Hero->build;
 	my $deck = Deck->build;
@@ -46,6 +47,7 @@ sub build_by_player_name {
 		field     => +[],
 		is_turn   => 0,
 		is_turn_initialized => 0, # turnごとのinitialize
+		abilityMgr => $amgr,
 	});
 
 }
@@ -145,9 +147,18 @@ sub play_card_by_no {
 	}
 
 	#呪文ならば使用
-	if ($played_card->is_spell) {
+	if ($played_card->get_type eq 1) {
 		$self->use_mana_by_cost($played_card->get_cost);
-		$played_card->use_spell($self, $opponent);
+		$self->get_abilityMgr->use_ability($played_card->get_id,$self, $opponent);
+
+		return +{
+			has_error => 0,
+		};
+
+	#フィールド魔法ならばアビリティマネジャーにセット
+	}elsif($played_card->get_type eq 2) {
+		$self->use_mana_by_cost($played_card->get_cost);
+		$self->get_abilityMgr->set_field($played_card->get_id);
 
 		return +{
 			has_error => 0,
@@ -327,8 +338,14 @@ sub can_use_hero_power {
 sub use_hero_power {
 	my $self = shift;
 	my ($opponent) = @_;
-	$self->use_mana_by_cost($self->get_hero->get_hero_power_cost);
-	$self->get_hero->use_hero_power($self, $opponent);
+	if ($self->can_use_hero_power) {
+		print "Hero used hero power.\n";
+		$self->use_mana_by_cost($self->get_hero->get_hero_power_cost);
+		$self->get_abilityMgr->use_hero_power($self->get_hero->get_hero_power, $self, $opponent);
+	}else{
+		print "Hero couldn't use hero power.\n";
+	}
+	
 }
 
 sub show_content {
@@ -336,14 +353,17 @@ sub show_content {
 	my ($no_hand_information) = @_;
 
 	my $player_name = $self->get_name;
-	print "${player_name} \'s information .\n";
+	print "### ${player_name}\'s information ###\n";
 
 	# mana
 	my $usable_mana = $self->usable_mana;
 	my $max_mana     = $self->get_max_mana;
 	print "mana ${usable_mana} / ${max_mana} .\n";
+	print "\n";
 
 	$self->get_hero->show_content;
+	$self->get_abilityMgr->show_content_with_type_and_id(3, $self->get_hero->get_hero_power);
+	print "\n";
 
 	my $no = 1;
 	unless ($no_hand_information) {
@@ -352,17 +372,24 @@ sub show_content {
 			print "===.\n";
 			print "no: ${no}.\n";
 			$hand_card->show_content;
+			$self->get_abilityMgr->show_content_with_type_and_id($hand_card->get_type, $hand_card->get_id);
+
 			$no++;
 		}
+		print "\n";
 	}
 
-	print "\n";
 	print "### field ###\n";
+	print "field ability:\n";
+	$self->get_abilityMgr->show_field_content;
+
 	$no = 1;
 	for my $field (@{$self->get_field}) {
 		print "===.\n";
 		print "no: ${no}.\n";
 		$field->show_content;
+		
+
 		$no++;
 	}
 	print "\n";

@@ -1,11 +1,9 @@
-package Spell;
+package Field;
 
 use strict;
 use warnings;
 
 use parent qw/Class::Accessor::Fast/;
-
-#手札破壊の効果が実装される場合を考え health 及び is_alive は残した。
 
 my @attributes = qw/
 	type
@@ -20,8 +18,6 @@ __PACKAGE__->mk_accessors(@attributes);
 sub build_by_conf {
 	my $class = shift;
 	my ($conf) = @_;
-
-	my $spell = Ability->build;
 
 	return $class->new(+{
 		type          => $conf->{type} || 0,
@@ -41,7 +37,7 @@ sub is_alive {
 sub show_content {
 	my $self = shift;
 
-	print "type: Spell.\n";
+	print "type: Field.\n";
 	my $cost   = $self->get_cost;
 	print "cost: ${cost}.\n";
 }

@@ -2,18 +2,22 @@ use strict;
 use warnings;
 
 use Player;
+use AbilityMgr;
+
+my $abilityMgr = AbilityMgr->build;
+
 
 print "Welcome to HS.\n";
 print "Enter Player 1 name.\n";
 my $player1_name = <STDIN>;
 chomp $player1_name;
-my $player1 = Player->build_by_player_name($player1_name);
+my $player1 = Player->build_by_player_name($player1_name,$abilityMgr);
 $player1->initialize;
 
 print "Enter Player 2 name.\n";
 my $player2_name = <STDIN>;
 chomp $player2_name;
-my $player2 = Player->build_by_player_name($player2_name);
+my $player2 = Player->build_by_player_name($player2_name,$abilityMgr);
 $player2->initialize;
 
 $player1->turn_start;
@@ -38,6 +42,9 @@ while (1) {
 		$player->turn_initialize;
 	}
 
+	#ターンの最初にフィールド効果を適用（今は）
+	$abilityMgr->use_field($player,$opponent);
+
 	print "tell me your choice.\n";
 	my $command = <STDIN>;
 	chomp $command;
@@ -61,12 +68,7 @@ while (1) {
 	#2016/06/15
 	#ヒーローパワーの実装	
 	} elsif ($command eq 'hp') {
-		if($player->can_use_hero_power){
-			print "could\n";
-			$player->use_hero_power($opponent);
-		}else{
-			print "cannot\n";
-		}
+		$player->use_hero_power($opponent);
 	} else {
 		print "attack: attack by your field card.\n";
 		print "play: play by your hand.\n";

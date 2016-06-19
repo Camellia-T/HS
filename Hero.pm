@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use parent qw/Class::Accessor::Fast/;
-use Ability;
 
 #2016/06/15
 #ヒーローパワーの実装
@@ -23,11 +22,10 @@ my $HERO_POWER_COST = 2;
 
 sub build {
 	my $class = shift;
-	my $hp = Ability->build;
 
 	return $class->new(+{
 		health     => $DEFAULT_HEALTH,
-		hero_power => $hp,
+		hero_power => 0,
 		used_hero_power => 0,
 	});
 }
@@ -53,15 +51,6 @@ sub refresh_hero_power {
 	$self->set_used_hero_power(1);
 }
 
-sub use_hero_power {
-	my $self = shift;
-	my ($player, $opponent) = @_;
-
-	#ここでアビリティ使用
-	$self->get_hero_power->manifest_ability($player,$opponent);
-	$self->set_used_hero_power(0);
-}
-
 sub can_use_hero_power {
 	my $self = shift;
 	return $self->get_used_hero_power == 1 ? 1 : 0;
@@ -79,7 +68,6 @@ sub show_content {
 
 	print "### Hero ###\n";
 	print "health: ${health}.\n";
-	$self->get_hero_power->show_content;
 }
 
 1;

@@ -10,6 +10,8 @@ use parent qw/Class::Accessor::Fast/;
 ##add divine_shield
 
 my @attributes = qw/
+	type
+	id
 	cost
 	attack
 	health
@@ -31,6 +33,8 @@ sub build_by_conf {
 	my ($conf) = @_;
 
 	return $class->new(+{
+		type          => $conf->{type} || 0,
+		id            => $conf->{id} || 0,
 		cost          => $conf->{cost},
 		attack        => $conf->{attack},
 		health        => $conf->{health},
@@ -121,7 +125,6 @@ sub show_content {
 	my $has_divine_shield = $self->has_divine_shield;
 
 	print "type: Minion.\n";
-
 	print "cost: ${cost}.\n";
 	print "attack: ${attack}.\n";
 	print "health: ${health}.\n";

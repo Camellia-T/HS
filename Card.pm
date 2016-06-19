@@ -5,6 +5,7 @@ use warnings;
 
 use Minion;
 use Spell;
+use Field;
 
 use parent qw/Class::Accessor::Fast/;
 
@@ -25,12 +26,14 @@ sub build_by_conf {
 	my $class = shift;
 	my ($conf) = @_;
 
-	my $spell = $conf->{spell} || 0;
+	my $type = $conf->{type} || 0;
 
-	if($spell){
-		return Spell->build_by_conf($conf);
-	}else{
+	if($type eq 0){
 		return Minion->build_by_conf($conf);
+	}elsif($type eq 1){
+		return Spell->build_by_conf($conf);
+	}elsif($type eq 2){
+		return Field->build_by_conf($conf);
 	}
 }
 

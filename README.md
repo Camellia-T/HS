@@ -1,4 +1,4 @@
-# HS
+# Hearthstone
 
 ## how to play
 
