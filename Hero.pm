@@ -23,9 +23,46 @@ my $HERO_POWER_COST = 2;
 sub build {
 	my $class = shift;
 
+	print "1: DealTwoDamage\n";
+	print "2: LifeTap\n";
+	print "which hero power do you play? type no \n";
+	my $no = <STDIN>;
+	chomp $no;
+
+	# 数字チェック
+	if ($no !~ /^\d+$/) {
+		print "invalid input: ${no} \n";
+	}
+
+	# 大きさチェック
+	unless ($no > 0 && $no <= 3) {
+		print "invalid input: ${no} \n";
+	}
+
+	my $name = "";
+
+	if($no == 1){
+		$name = "DealTwoDamage";
+	}elsif($no == 2){
+		$name = "LifeTap";
+	}else{
+		$name = "DealTwoDamage";
+	}
+
 	return $class->new(+{
 		health     => $DEFAULT_HEALTH,
-		hero_power => 0,
+		hero_power => $name,
+		used_hero_power => 0,
+	});
+}
+
+sub build_by_hero_power {
+	my $class = shift;
+	my $name = @_;
+
+	return $class->new(+{
+		health     => $DEFAULT_HEALTH,
+		hero_power => $name,
 		used_hero_power => 0,
 	});
 }

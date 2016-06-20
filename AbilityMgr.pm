@@ -4,11 +4,16 @@ use strict;
 use warnings;
 
 use parent qw/Class::Accessor::Fast/;
-use Ability;
+
+use lib 'Abilities';
 use None;
+use TakeOneDamage;
+use DealTwoDamage;
+use LifeTap;
+use DealThreeDamageToAllMinion;
 
 my @attributes = qw/
-	field_id
+	field_name
 	field_list
 	ability_list
 	hero_power_list
@@ -20,100 +25,131 @@ __PACKAGE__->mk_accessors(@attributes);
 # AbilityMgr クラスはヒーローパワー、スペルアビリティ、
 # そしてフィールドアビリティの一元管理機構と提供窓口を持つ。
 
-#Type 0: ミニオン及び効果なしカード
-#Type 1: スペルカード
-#Type 2: フィールドカード
-#Type 3: ヒーローパワー
+# アビリティは敵味方両方の保持するデータ全てに適用される可能性が在るため、
+# 自分自身と敵対者のPlayerクラスを引数にもらい、効果を適用する。
+# プレイヤーが持つヒーローやカードがプレイヤーに影響を及ぼすという
+# 処理の循環が生じる可能性があるためアビリティは一元管理していたほうが良いと判断。
+
+# type を表す引数を build で受け取りそれぞれに対応したアビリティクラスを返してやることで
+# このクラスを使用するクラスがその中身を意識する必要性を限りなく低くする。
 
 sub build {
 	my $self = shift;
 
-	my @fl = (None->build, Ability->build);
-	my @al = (None->build, Ability->build);
-	my @hl = (None->build, Ability->build);
+	my $fields = {
+    	None           => None->build,
+    	TakeOneDamage  => TakeOneDamage->build,
+	};
+
+	my $abilities = {
+    	DealTwoDamage  => DealTwoDamage->build,
+    	LifeTap => LifeTap->build,
+    	DealThreeDamageToAllMinion => DealThreeDamageToAllMinion->build,
+	};
+
+	my $hero_powers = {
+    	DealTwoDamage  => DealTwoDamage->build,
+    	LifeTap => LifeTap->build,
+	};
 
 	return $self->new(+{
-		field_id        => 0,
-		field_list      => @fl,
-		ability_list    => @al,
-		hero_power_list => @hl,
+		field_name      => "None",
+		field_list      => $fields,
+		ability_list    => $abilities,
+		hero_power_list => $hero_powers,
 	});
+}
+
+sub play_card {
+	my $self = shift;
+	my ($hash, $player, $opponent) = @_;
+
+	if($hash->{'has_error'} == 0){
+		if($hash->{'type'} eq "Spell"){
+			$self->use_ability($hash->{'ability'}, $player, $opponent);
+		}elsif($hash->{'type'} eq "Field"){
+			$self->use_field($hash->{'ability'}, $player, $opponent);
+		}
+	}
 }
 
 sub set_field {
 	my $self = shift;
-	my ($no) = @_;
+	my ($name) = @_;
 
-	$self->set_field_id($no);
+	$self->set_field_name($name);
 }
 
 sub get_field {
 	my $self = shift;
+	my ($name) = @_;
 
-	my @field = $self->get_field_list;
-	return $field[$self->get_field_id];
+	return $self->get_field_list->{$name};
 }
 
 sub use_field {
 	my $self = shift;
 	my ($player, $opponent) = @_;
 
-	my @field = $self->get_field_list;
-	$field[$self->get_field_id]->manifest_ability($player, $opponent);
+	$self->get_field_list->{$self->get_field_name}->manifest_ability($player, $opponent);
 }
 
 sub get_ability {
 	my $self = shift;
-	my ($no) = @_;
+	my ($name) = @_;
 
-	my @ability = $self->get_ability_list;
-	return $ability[$no];
+	return $self->get_ability_list->{$name};
 }
 
 sub use_ability {
 	my $self = shift;
-	my ($no, $player, $opponent) = @_;
+	my ($name, $player, $opponent) = @_;
 
-	my @ability = $self->get_ability_list;
-	$ability[$no]->manifest_ability($player, $opponent);
+	$self->get_ability_list->{$name}->manifest_ability($player, $opponent);
 }
 
 sub get_hero_power {
 	my $self = shift;
-	my ($no) = @_;
+	my ($name) = @_;
 
-	my @hero_power = $self->get_hero_power_list;
-	return $hero_power[$no];
+	return $self->get_hero_power_list->{$name};
 }
 
 sub use_hero_power {
 	my $self = shift;
-	my ($no, $player, $opponent) = @_;
+	my ($name, $player, $opponent) = @_;
 
-	my @hero_power = $self->get_hero_power_list;
-	$hero_power[$no]->manifest_ability($player, $opponent);
+	$self->get_hero_power_list->{$name}->manifest_ability($player, $opponent);
 }
 
 sub show_content_with_type_and_id {
 	my $self = shift;
-	my ($type,$id) = @_;
+	my ($type,$name) = @_;
 
-	if($type eq 1) {
-		my @ability = $self->get_ability_list;
-		$ability[$id]->show_content;
-	}elsif($type eq 2) {
-		my @field = $self->get_field_list;
-		$field[$id]->show_content;
-	}elsif($type eq 3) {
-		my @hero_power = $self->get_hero_power_list;
-		$hero_power[$id]->show_content;
+	if($type eq "Spell") {
+		$self->get_ability($name)->show_content;
+	}elsif($type eq "Field") {
+		$self->get_field($name)->show_content;
+	}elsif($type eq "HeroPower") {
+		$self->get_hero_power($name)->show_content;
 	}
 }
 
 sub show_field_content {
 	my $self = shift;
-	my $field = $self->get_field;
-	$field->show_content;
+
+	$self->get_field($self->get_field_name)->show_content;
+}
+
+sub show_hero_power_list {
+	my $self = shift;
+
+	my @keylist = keys(%{$self->get_hero_power_list});
+	my $keycount = keys(%{$self->get_hero_power_list});
+	
+	for (my $i = 1; $i <= $keycount; $i++){
+	  print "${i}:$keylist[$i - 1] \n";
+	}
 }
 
 1;

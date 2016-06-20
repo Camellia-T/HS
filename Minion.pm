@@ -11,7 +11,7 @@ use parent qw/Class::Accessor::Fast/;
 
 my @attributes = qw/
 	type
-	id
+	ability
 	cost
 	attack
 	health
@@ -34,7 +34,7 @@ sub build_by_conf {
 
 	return $class->new(+{
 		type          => $conf->{type} || 0,
-		id            => $conf->{id} || 0,
+		ability       => $conf->{ability} || "None",
 		cost          => $conf->{cost},
 		attack        => $conf->{attack},
 		health        => $conf->{health},

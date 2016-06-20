@@ -10,8 +10,7 @@ use parent qw/Class::Accessor::Fast/;
 my @attributes = qw/
 	type
 	cost
-	id
-	health
+	ability
 /;
 
 __PACKAGE__->follow_best_practice;
@@ -21,21 +20,12 @@ sub build_by_conf {
 	my $class = shift;
 	my ($conf) = @_;
 
-	my $spell = Ability->build;
-
 	return $class->new(+{
 		type          => $conf->{type} || 0,
 		cost          => $conf->{cost},
-		id            => $conf->{id},
-		health        => 1,
+		ability       => $conf->{ability},
 	});
 
-}
-
-sub is_alive {
-	my $self = shift;
-
-	return $self->get_health > 0 ? 1 : 0;
 }
 
 sub show_content {

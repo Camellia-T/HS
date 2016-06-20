@@ -34,8 +34,27 @@ sub build_by_player_name {
 	my $class = shift;
 	my ($name,$amgr) = @_;
 
-	my $hero = Hero->build;
 	my $deck = Deck->build;
+	my $hero = Hero->build;
+
+	return $class->new(+{
+		name      => $name,
+		used_mana => 0,
+		max_mana  => $DEFAULT_MANA,
+		hero      => $hero,
+		deck      => $deck,
+		hand      => +[],
+		field     => +[],
+		is_turn   => 0,
+		is_turn_initialized => 0, # turnごとのinitialize
+		abilityMgr => $amgr,
+	});
+
+}
+
+sub build_by_player_name_deck_and_hero {
+	my $class = shift;
+	my ($name,$deck,$hero,$amgr) = @_;
 
 	return $class->new(+{
 		name      => $name,
@@ -147,21 +166,25 @@ sub play_card_by_no {
 	}
 
 	#呪文ならば使用
-	if ($played_card->get_type eq 1) {
+	if ($played_card->get_type eq "Spell") {
 		$self->use_mana_by_cost($played_card->get_cost);
-		$self->get_abilityMgr->use_ability($played_card->get_id,$self, $opponent);
+		#$self->get_abilityMgr->use_ability($played_card->get_ability, $self, $opponent);
 
 		return +{
 			has_error => 0,
+			type      => $played_card->get_type,
+			ability   => $played_card->get_ability,
 		};
 
 	#フィールド魔法ならばアビリティマネジャーにセット
-	}elsif($played_card->get_type eq 2) {
+	}elsif($played_card->get_type eq "Field") {
 		$self->use_mana_by_cost($played_card->get_cost);
-		$self->get_abilityMgr->set_field($played_card->get_id);
+		#$self->get_abilityMgr->set_field($played_card->get_ability);
 
 		return +{
 			has_error => 0,
+			type      => $played_card->get_type,
+			ability   => $played_card->get_ability,
 		};
 	}
 
@@ -312,7 +335,8 @@ sub field_list {
 sub hand_list {
 	my $self = shift;
 
-	return +[ grep { $_->is_alive } @{$self->get_hand}];
+	#return +[ grep { $_->is_alive } @{$self->get_hand}];
+	return +[  @{$self->get_hand}];
 }
 
 sub hand_num {
@@ -348,6 +372,24 @@ sub use_hero_power {
 	
 }
 
+#2016/06/20
+#add hand death system
+sub hand_death {
+	my $self = shift;
+	my ($no) = @_;
+
+	# no - 1 番目から 1枚取る
+	
+
+	unless ($no > 0 && $no <= $self->hand_num) {
+		print "invalid input: ${no} \n";
+		return;
+	}
+
+	splice(@{$self->get_hand}, $no - 1, 1);
+}
+
+
 sub show_content {
 	my $self = shift;
 	my ($no_hand_information) = @_;
@@ -362,7 +404,7 @@ sub show_content {
 	print "\n";
 
 	$self->get_hero->show_content;
-	$self->get_abilityMgr->show_content_with_type_and_id(3, $self->get_hero->get_hero_power);
+	$self->get_abilityMgr->show_content_with_type_and_id("HeroPower", $self->get_hero->get_hero_power);
 	print "\n";
 
 	my $no = 1;
@@ -372,7 +414,7 @@ sub show_content {
 			print "===.\n";
 			print "no: ${no}.\n";
 			$hand_card->show_content;
-			$self->get_abilityMgr->show_content_with_type_and_id($hand_card->get_type, $hand_card->get_id);
+			$self->get_abilityMgr->show_content_with_type_and_id($hand_card->get_type, $hand_card->get_ability);
 
 			$no++;
 		}

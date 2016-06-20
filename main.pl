@@ -40,10 +40,11 @@ while (1) {
 	# turn毎のinitializeしとく
 	unless ($player->is_turn_initialized) {
 		$player->turn_initialize;
+		#ターンの最初にフィールド効果を適用（今は）
+		$abilityMgr->use_field($player,$opponent);
 	}
 
-	#ターンの最初にフィールド効果を適用（今は）
-	$abilityMgr->use_field($player,$opponent);
+	
 
 	print "tell me your choice.\n";
 	my $command = <STDIN>;
@@ -117,9 +118,10 @@ sub play {
 		return;
 	}
 
-	my $error_hash = $player->play_card_by_no($no, $opponent);
-	if ($error_hash->{has_error}) {
-		print $error_hash->{message};
+	my $hash = $player->play_card_by_no($no, $opponent);
+	$abilityMgr->play_card($hash, $player, $opponent);
+	if ($hash->{has_error}) {
+		print $hash->{message};
 		print "\n";
 	}
 }

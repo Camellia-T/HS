@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Conf;
-use Card;
+use CardBuilder;
 use List::Util qw/shuffle/;
 use parent qw/Class::Accessor::Fast/;
 
@@ -18,9 +18,9 @@ __PACKAGE__->mk_accessors(@attributes);
 sub build {
 	my $class = shift;
 
-	my $DEFAULT_DECK_SEED = Conf->DEFAULT_DECK_SEED;
+	my $DEFAULT_DECK_SEED = Conf->build;
 
-	my $cards = +[ shuffle map { Card->build_by_conf($_) } @$DEFAULT_DECK_SEED ];
+	my $cards = +[ shuffle map { CardBuilder->build_by_conf($_) } @$DEFAULT_DECK_SEED ];
 
 	return $class->new(+{
 		cards     => $cards,
